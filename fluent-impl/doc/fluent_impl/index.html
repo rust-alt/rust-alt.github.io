@@ -1,0 +1,287 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `fluent_impl` crate."><meta name="keywords" content="rust, rustlang, rust-lang, fluent_impl"><title>fluent_impl - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script></head><body class="rustdoc mod"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><p class='location'>Crate fluent_impl</p><div class="sidebar-elems"><div class="block items"><ul><li><a href="#functions">Functions</a></li></ul></div><p class='location'></p><script>window.sidebarCurrent = {name: 'fluent_impl', ty: 'mod', relpath: '../'};</script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form js-only"><div class="search-container"><input class="search-input" name="search" autocomplete="off" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/fluent_impl/lib.rs.html#15-384' title='goto source code'>[src]</a></span><span class='in-band'>Crate <a class="mod" href=''>fluent_impl</a></span></h1><div class='docblock'><p>A procedural macro that generates chaining methods from non-chaining ones in an impl block.</p>
+<p>When applied to an impl block, <code>#[fluent_impl]</code> will scan all methods in the block
+in search for chain-able methods, and generate chaining methods
+from them.</p>
+<p>Chain-able methods are the ones with <code>&amp;mut self</code> as a first argument, and return nothing.
+That's it, there are no other restrictions.</p>
+<h1 id="usage" class="section-header"><a href="#usage">Usage</a></h1>
+<p>Add <code>fluent-impl</code> to the dependencies in <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dependencies]
+fluent-impl = &quot;0.1&quot;
+</code></pre>
+<p>Then add the following to the top of <code>src/lib.rs</code>:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ<span class='tooltiptext'>This example is not tested</span></div></div><pre class="rust rust-example-rendered ignore">
+<span class="comment">// Will be stabilized soon</span>
+<span class="attribute">#![<span class="ident">feature</span>(<span class="ident">use_extern_macros</span>)]</span>
+
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">fluent_impl</span>;
+
+<span class="kw">use</span> <span class="ident">fluent_impl</span>::{<span class="ident">fluent_impl</span>, <span class="ident">fluent_impl_opts</span>};
+</pre>
+<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1>
+<p>If we have a simple struct with a simple impl block:</p>
+
+<pre class="rust rust-example-rendered">
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>, <span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Simple</span> {
+    <span class="ident">num</span>: <span class="ident">i32</span>,
+}
+
+<span class="kw">impl</span> <span class="ident">Simple</span> {
+    <span class="comment">// ...</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_1</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">num</span> <span class="op">+=</span><span class="number">1</span>;
+    }
+}</pre>
+<p>Then we add the macro attribute to the impl block:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ<span class='tooltiptext'>This example is not tested</span></div></div><pre class="rust rust-example-rendered ignore">
+<span class="attribute">#[<span class="ident">fluent_impl</span>]</span>
+<span class="kw">impl</span> <span class="ident">Simple</span> {
+    <span class="comment">// ...</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_1</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="self">self</span>.<span class="ident">num</span> <span class="op">+=</span><span class="number">1</span>;
+    }
+}</pre>
+<p>The macro will generate a new impl block with the content:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ<span class='tooltiptext'>This example is not tested</span></div></div><pre class="rust rust-example-rendered ignore">
+<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Chaining (fluent) methods for [`Simple`].&quot;</span>]</span>
+<span class="kw">impl</span> <span class="ident">Simple</span> {
+    <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;The chaining (fluent) equivalent of [`add_1()`].\n\n [`add_1`]: Simple::add_1\n [`add_1()`]: Simple::add_1&quot;</span>]</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_add_1</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">add_1</span>();
+        <span class="self">self</span>
+    }
+}</pre>
+<p>A full more involved example can be found bellow the <em>Attribute Configuration</em> section.</p>
+<h1 id="attribute-configuration" class="section-header"><a href="#attribute-configuration">Attribute Configuration</a></h1>
+<p><code>#[fluent_impl]</code> is configurable with comma-separated options passed to the attribute
+itself, and options passed to a method-level attribute <code>#[fluent_impl_opts]</code>.</p>
+<h2 id="fluent_impl-attribute-options" class="section-header"><a href="#fluent_impl-attribute-options"><code>#[fluent_impl]</code> Attribute Options</a></h2>
+<p><em>(<code>inblock</code>, <code>non_public</code>, <code>prefix</code>, <code>impl_doc</code>, <code>doc</code>)</em></p>
+<p><em>impl block</em>-level configuration.</p>
+<h3 id="example" class="section-header"><a href="#example">Example</a></h3>
+<div class='information'><div class='tooltip ignore'>ⓘ<span class='tooltiptext'>This example is not tested</span></div></div><pre class="rust rust-example-rendered ignore">
+<span class="attribute">#[<span class="ident">fluent_impl</span>(<span class="ident">inblock</span>, <span class="ident">non_public</span>, <span class="ident">prefix</span><span class="op">=</span><span class="string">&quot;chain_&quot;</span>)]</span>
+<span class="kw">impl</span> <span class="ident">Simple</span> {
+    <span class="comment">// ...</span>
+}</pre>
+<h3 id="options" class="section-header"><a href="#options">Options</a></h3>
+<ul>
+<li>
+<p><strong><code>inblock</code></strong> (default: unset)</p>
+<p>By default, a new impl block is generated, and chaining methods are added there.
+If <code>inblock</code> is passed, every chaining method will be generated right below
+the chain-able one.</p>
+<p>The order in which methods appear on docs is probably the only reason why you
+should care about this.</p>
+<p>There is a corresponding method-level <em><code>inblock</code></em> option which will selectively enable
+this behavior for individual methods.</p>
+</li>
+<li>
+<p><strong><code>non_public</code></strong> (default: unset)</p>
+<p>By default, non fully-public methods are skipped. If this option is passed, the macro
+will generate chaining equivalents for chain-able private or partially-public methods.</p>
+<p>There is a corresponding method-level <em><code>non_public</code></em> option which will selectively enable
+this behavior for individual methods.</p>
+</li>
+<li>
+<p><strong><code>prefix</code></strong> (default: &quot;with_&quot;)</p>
+<p>The default chaining method name is this prefix appended by the chain-able method name.</p>
+<ul>
+<li><em><code>prefix</code></em> is not allowed to be an empty string. Check the <em><code>name</code></em> method-level option
+if you want to name a chaining method to whatever you like.</li>
+</ul>
+<p>There is a corresponding method-level <em><code>prefix</code></em> option which will selectively override
+the value set here (or the default).</p>
+</li>
+<li>
+<p><strong><code>impl_doc</code></strong> (default: &quot;Chaining (fluent) methods for [`%t%`].&quot;)</p>
+<p>If a new block is generated for the chaining methods, this is the doc string template
+for it. <code>%t%</code> is is replaced with the type path.</p>
+</li>
+<li>
+<p><strong><code>doc</code></strong> (default: &quot;The chaining (fluent) equivalent of [`%f%()`].&quot;)</p>
+<p>Chaining method doc string template. <code>%t%</code> is is replaced with the type path. <code>%f%</code> is
+replaced with the chain-able method name.</p>
+<p>Additionally, the following is effectively appended at the end:</p>
+<pre><code class="language-text"> ///
+ /// [`%f%`]: %t%::%f%
+ /// [`%f%()`]: %t%::%f%
+</code></pre>
+<p>This allows proper hyper-linking of <code>[`%t%`]</code> and <code>[`%t%()`]</code>.</p>
+<p>There is a corresponding method-level <em><code>doc</code></em> option which will selectively override
+the value set here (or the default).</p>
+</li>
+</ul>
+<h2 id="fluent_impl_opts-attribute-options" class="section-header"><a href="#fluent_impl_opts-attribute-options"><code>#[fluent_impl_opts]</code> Attribute Options</a></h2>
+<p><em>(<code>inblock</code>, <code>non_public</code>, <code>skip</code>, <code>prefix</code>, <code>rename</code>, <code>name</code>, <code>doc</code>)</em></p>
+<p>Options passed to override block-level defaults, or set method-specific
+configurations.</p>
+<p>Unlike <code>#[fluent_impl]</code>, this attribute:</p>
+<ol>
+<li>Applies to methods instead of impl blocks.</li>
+<li>Can be passed multiple times to the same method if you please.</li>
+</ol>
+<h3 id="example-1" class="section-header"><a href="#example-1">Example</a></h3>
+<div class='information'><div class='tooltip ignore'>ⓘ<span class='tooltiptext'>This example is not tested</span></div></div><pre class="rust rust-example-rendered ignore">
+<span class="attribute">#[<span class="ident">fluent_impl</span>]</span>
+<span class="kw">impl</span> <span class="ident">Simple</span> {
+    <span class="attribute">#[<span class="ident">fluent_impl_opts</span>(<span class="ident">non_public</span>, <span class="ident">inblock</span>)]</span>
+    <span class="attribute">#[<span class="ident">fluent_impl_opts</span>(<span class="ident">prefix</span><span class="op">=</span><span class="string">&quot;chain_&quot;</span>, <span class="ident">rename</span><span class="op">=</span><span class="string">&quot;added_1&quot;</span>)]</span>
+    <span class="kw">fn</span> <span class="ident">add_1</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+        <span class="comment">// ...</span>
+    }
+}</pre>
+<h3 id="options-1" class="section-header"><a href="#options-1">Options</a></h3><h4 id="inherited" class="section-header"><a href="#inherited">Inherited</a></h4>
+<ul>
+<li>
+<p><strong><code>inblock</code></strong> (default: inherit)</p>
+<p>Set <em><code>inblock</code></em> for this specific method if it's not set for the block already.</p>
+</li>
+<li>
+<p><strong><code>non_public</code></strong> (default: inherit)</p>
+<p>Set <em><code>non_public</code></em> for this specific method if it's not set for the block already.</p>
+<p>This allows generating chaining methods for specific private methods, or
+partially public ones (e.g. <code>pub(crate)</code> methods).</p>
+</li>
+<li>
+<p><strong><code>prefix</code></strong> (default: inherit)</p>
+<p>Override the default, or the block value if set.</p>
+<ul>
+<li><em><code>prefix</code></em> is not allowed to be an empty string.</li>
+<li>Method-specific <em><code>prefix</code></em> is not allowed to be set if <em><code>name</code></em>(see below) is set.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>doc</code></strong> (default: inherit)</p>
+<p>Override the default, or the block value if set.</p>
+</li>
+</ul>
+<h4 id="method-specific" class="section-header"><a href="#method-specific">Method Specific</a></h4>
+<ul>
+<li>
+<p><strong><code>skip</code></strong> (default: unset)</p>
+<p>Skip this method. Don't generate anything from it.</p>
+</li>
+<li>
+<p><strong><code>rename</code></strong> (default: chain-able name)</p>
+<p>The default chaining method name is the prefix appended by the chain-able method
+name. This option allows you to rename the name that gets added to the prefix.</p>
+<ul>
+<li><em><code>rename</code></em> is not allowed to be an empty string.</li>
+<li><em><code>rename</code></em> is not allowed to be set if <em><code>name</code></em>(see below) is set and vise versa.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>name</code></strong> (default: unset)</p>
+<p>Set the name of the chaining method.</p>
+<ul>
+<li><em><code>name</code></em> is not allowed to be set if method-specific <em><code>prefix</code></em> or rename is set.</li>
+</ul>
+</li>
+</ul>
+<h1 id="full-example" class="section-header"><a href="#full-example">Full Example</a></h1>
+<pre class="rust rust-example-rendered">
+<span class="attribute">#![<span class="ident">feature</span>(<span class="ident">use_extern_macros</span>)]</span>
+
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">fluent_impl</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">m</span> {
+    <span class="kw">use</span> <span class="ident">fluent_impl</span>::{<span class="ident">fluent_impl</span>, <span class="ident">fluent_impl_opts</span>};
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">borrow</span>::<span class="ident">Borrow</span>;
+    <span class="kw">use</span> <span class="ident">std</span>::<span class="ident">ops</span>::<span class="ident">AddAssign</span>;
+
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TCounter</span>(<span class="kw">pub</span> <span class="ident">u32</span>);
+
+    <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">PartialEq</span>, <span class="ident">Debug</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">St</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddAssign</span><span class="op">&gt;</span> {
+        <span class="ident">value</span>: <span class="ident">A</span>,
+        <span class="ident">text</span>: <span class="ident">String</span>,
+    }
+
+    <span class="attribute">#[<span class="ident">fluent_impl</span>]</span>
+    <span class="comment">// impl block with generic arguments works</span>
+    <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">AddAssign</span><span class="op">&gt;</span> <span class="ident">St</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span> {
+        <span class="comment">// Constants (or any other items) in impl block are okay</span>
+        <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">const</span> <span class="ident">C_TC</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">100</span>;
+
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">A</span>, <span class="ident">text</span>: <span class="ident">String</span>) <span class="op">-&gt;</span> <span class="self">Self</span> {
+            <span class="self">Self</span> { <span class="ident">value</span>, <span class="ident">text</span> }
+        }
+
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">A</span> {
+            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">value</span>
+        }
+
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_text</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+            <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">text</span>
+        }
+
+        <span class="attribute">#[<span class="ident">fluent_impl_opts</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;added_value&quot;</span>)]</span>
+        <span class="comment">// Destructuring patterns in method arguments are okay</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_value</span>(
+            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
+            <span class="ident">to_be_added</span>: <span class="ident">A</span>,
+            <span class="ident">TCounter</span>(<span class="ident">counter</span>): <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TCounter</span>,
+        ) {
+            <span class="self">self</span>.<span class="ident">value</span> <span class="op">+=</span> <span class="ident">to_be_added</span>;
+            <span class="kw-2">*</span><span class="ident">counter</span> <span class="op">+=</span> <span class="number">1</span>;
+        }
+
+        <span class="attribute">#[<span class="ident">fluent_impl_opts</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;appended_text&quot;</span>)]</span>
+        <span class="comment">// Generic method arguments are okay</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">append_text</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">arg</span>: <span class="ident">S</span>) {
+            <span class="self">self</span>.<span class="ident">text</span> <span class="op">+=</span> <span class="ident">arg</span>.<span class="ident">borrow</span>();
+        }
+
+        <span class="attribute">#[<span class="ident">fluent_impl_opts</span>(<span class="ident">rename</span> <span class="op">=</span> <span class="string">&quot;appended_text_impl_trait&quot;</span>)]</span>
+        <span class="comment">// Needless to say, impl Trait method arguments are also okay</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">append_text_impl_trait</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">arg</span>: <span class="kw">impl</span> <span class="ident">Borrow</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>) {
+            <span class="self">self</span>.<span class="ident">text</span> <span class="op">+=</span> <span class="ident">arg</span>.<span class="ident">borrow</span>();
+        }
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">use</span> <span class="ident">m</span>::{<span class="ident">St</span>, <span class="ident">TCounter</span>};
+    <span class="comment">// ========</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tc1</span> <span class="op">=</span> <span class="ident">TCounter</span>(<span class="ident">St</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>::<span class="ident">C_TC</span>);
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s1</span> <span class="op">=</span> <span class="ident">St</span>::<span class="ident">new</span>(<span class="number">0u32</span>, <span class="string">&quot;&quot;</span>.<span class="ident">into</span>());
+    <span class="ident">s1</span>.<span class="ident">append_text</span>(<span class="string">&quot;simple &quot;</span>);
+    <span class="ident">s1</span>.<span class="ident">append_text</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>(<span class="string">&quot;turbo fish &quot;</span>);
+    <span class="ident">s1</span>.<span class="ident">append_text_impl_trait</span>(<span class="string">&quot;impl trait&quot;</span>);
+    <span class="ident">s1</span>.<span class="ident">add_value</span>(<span class="number">5</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tc1</span>);
+    <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s1</span>.<span class="ident">get_text</span>(), <span class="string">&quot;simple turbo fish impl trait&quot;</span>);
+    <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">tc1</span>, <span class="ident">TCounter</span>(<span class="ident">St</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>::<span class="ident">C_TC</span> <span class="op">+</span> <span class="number">1</span>));
+    <span class="comment">// ========</span>
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tc2</span> <span class="op">=</span> <span class="ident">TCounter</span>(<span class="ident">St</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>::<span class="ident">C_TC</span>);
+    <span class="kw">let</span> <span class="ident">s2</span> <span class="op">=</span> <span class="ident">St</span>::<span class="ident">new</span>(<span class="number">0u32</span>, <span class="string">&quot;&quot;</span>.<span class="ident">into</span>())
+        .<span class="ident">with_appended_text</span>(<span class="string">&quot;simple &quot;</span>)
+        .<span class="ident">with_appended_text</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>(<span class="string">&quot;turbo fish &quot;</span>)
+        .<span class="ident">with_appended_text_impl_trait</span>(<span class="string">&quot;impl trait&quot;</span>)
+        .<span class="ident">with_added_value</span>(<span class="number">5</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tc2</span>);
+    <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">s2</span>, <span class="ident">s1</span>);
+    <span class="macro">assert_eq</span><span class="macro">!</span>(<span class="ident">tc2</span>, <span class="ident">tc1</span>);
+}</pre>
+</div><h2 id='functions' class='section-header'><a href="#functions">Functions</a></h2>
+<table>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.fluent_impl.html"
+                                  title='fn fluent_impl::fluent_impl'>fluent_impl</a></td>
+                           <td class='docblock-short'>
+                                <p>Check the top-level documentation of this crate</p>
+
+                           </td>
+                       </tr>
+                       <tr class=' module-item'>
+                           <td><a class="fn" href="fn.fluent_impl_opts.html"
+                                  title='fn fluent_impl::fluent_impl_opts'>fluent_impl_opts</a></td>
+                           <td class='docblock-short'>
+                                <p>Check the top-level documentation of this crate</p>
+
+                           </td>
+                       </tr></table></section><section id="search" class="content hidden"></section><section class="footer"></section><aside id="help" class="hidden"><div><h1 class="hidden">Help</h1><div class="shortcuts"><h2>Keyboard Shortcuts</h2><dl><dt><kbd>?</kbd></dt><dd>Show this help dialog</dd><dt><kbd>S</kbd></dt><dd>Focus the search field</dd><dt><kbd>↑</kbd></dt><dd>Move up in search results</dd><dt><kbd>↓</kbd></dt><dd>Move down in search results</dd><dt><kbd>↹</kbd></dt><dd>Switch tab</dd><dt><kbd>&#9166;</kbd></dt><dd>Go to active search result</dd><dt><kbd>+</kbd></dt><dd>Expand all sections</dd><dt><kbd>-</kbd></dt><dd>Collapse all sections</dd></dl></div><div class="infos"><h2>Search Tricks</h2><p>Prefix searches with a type followed by a colon (e.g. <code>fn:</code>) to restrict the search to a given type.</p><p>Accepted types are: <code>fn</code>, <code>mod</code>, <code>struct</code>, <code>enum</code>, <code>trait</code>, <code>type</code>, <code>macro</code>, and <code>const</code>.</p><p>Search functions by type signature (e.g. <code>vec -> usize</code> or <code>* -> vec</code>)</p><p>Search multiple things at once by splitting your query with comma (e.g. <code>str,u8</code> or <code>String,struct:Vec,test</code>)</p></div></div></aside><script>window.rootPath = "../";window.currentCrate = "fluent_impl";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>
