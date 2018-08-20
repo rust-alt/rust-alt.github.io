@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Attr","Terminal attributes for use with term.attr()."]],"mod":[["color","Terminal color definitions"]],"struct":[["TermString","A string type with term styling info attached to it."],["TermStyle","Styling info for [`TermString`]."]],"trait":[["TermWrite",""]]});

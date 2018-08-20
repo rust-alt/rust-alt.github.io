@@ -1,0 +1,16 @@
+var ALIASES = {};
+ALIASES['byteorder'] = {};
+ALIASES['dirs'] = {};
+ALIASES['isatty'] = {};
+ALIASES['libc'] = {};
+ALIASES['mashup'] = {};
+ALIASES['mashup_impl'] = {};
+ALIASES['proc_macro2'] = {};
+ALIASES['proc_macro_hack'] = {};
+ALIASES['proc_macro_hack_impl'] = {};
+ALIASES['term'] = {};
+ALIASES['term_string'] = {};
+ALIASES['term_string'] = {};
+ALIASES['term_string'] = {};
+ALIASES['term_string'] = {};
+ALIASES['unicode_xid'] = {};
